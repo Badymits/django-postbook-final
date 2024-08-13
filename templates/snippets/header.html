@@ -1,0 +1,381 @@
+{% load humanize %}
+<header class="bg-gray-300 h-[60px] grid grid-cols-9  md:grid-cols-7 xl:grid-cols-5
+gap-2 justify-items-stretch items-center px-10 fixed w-screen z-50 border-b-[1px] border-gray-500">
+    
+    <div class="w-[10%] col-start-1 col-end-2 xl:col-start-1 xl:col-end-2 gap-2 text-4xl font-thin">
+
+        <i class="fa fa-bars xl:hidden text-lg absolute left-2 top-2 hover:bg-gray-400 rounded-full cursor-pointer p-2 w-10 text-center h-10 z-50" id="side_menu" aria-hidden="true"></i>
+        <a href="{% url 'home' %}" class="xl:block hidden">PostBook</a>
+        
+    </div>
+    
+    <div class=" md:col-start-2 md:col-end-8 xl:col-start-2 xl:col-end-5 flex items-center gap-4">
+
+        <form action="{% url 'get-search-results'  %}" method="get" class="relative w-[900px] hidden xl:block md:block xl:w-[700px] md:w-[800px]   rounded-t-xl pb-3 xl:mt-2 md:mt-2" id="search_form">
+            
+            <div class="flex relative mx-1">
+                <i class="fa fa-search absolute left-2 z-50 top-3 bottom-3 " aria-hidden="true"></i>
+                <input type="text" name="search" placeholder="Search Postbook " class="pl-7 w-full rounded-full font-sans hover:bg-white/75 " id="search_input" />
+                
+            </div>
+            
+            <div class="hidden absolute w-[100%] pl-7 bg-gray-400 top-[3.1em] rounded-b-xl py-4 border-t-[1px] border-gray-200" id="search_menu">
+                <p class="text-sm">Search History</p>
+            </div>
+            
+        </form>
+
+        <div class="text-sm mb-2 absolute right-2 top-3 xl:static md:static xl:m-0 md:m-0 xl:p-3">
+            <div class="flex items-center w-full gap-2 xl:gap-8 lg:gap-4">
+
+                <a class="ml-6 xl:hidden md:hidden" id="mobile_search_icon">
+                    <i class="fa fa-search text-2xl cursor-pointer " id="mobile_search_icon" aria-hidden="true"></i>
+                </a>
+
+                <a href="{% url 'home' %}" class="ml-6 xl:m-0 md:m-0">
+                    <i class="fa fa-home text-3xl" data-tooltip-target="tooltip-home" data-tooltip-placement="bottom" aria-hidden="true"></i>
+                </a>
+                
+                <div class="ml-6 relative">
+                    <i class="fa fa-bell text-2xl cursor-pointer" id="notif_btn" aria-hidden="true" data-tooltip-target="tooltip-notif" data-tooltip-placement="bottom"></i>
+                    <div class="hidden notif md:max-xl:notif_menu absolute top-9 right-0 w-[400px] bg-gray-100 shadow-md rounded-lg text-lg">
+                        <!-- place number of unread notifications -->
+                        <!-- on login, if there are any unread notifications, show a popup message below the icon saying "you have x notifications" -->
+                        <div class="p-3 border-b-[1px] border-gray-600 flex items-center justify-between">
+                            Notifications
+                            <a href="{% url 'settings' 'account' %}">
+                                <i class="fa fa-cog" aria-hidden="true" data-tooltip-target="tooltip-settings" data-tooltip-placement="bottom"></i>   
+                            </a>
+                             
+                        </div>
+
+                        <!-- put for loop here -->
+                        {% if notifications %}
+
+                            {% for notif in notifications|slice:":3" %}
+                                <div class="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-300 {% if notif.is_read == False %} bg-blue-200  {% endif %}">
+                                    <div class="w-10 h-10 bg-red-200 rounded-[50%] relative overflow-hidden">
+                                        <img src="{{ notif.sender.get_user_photo_url}}" alt="{{ notif.sender.username }}"  class="h-full w-full object-cover"/>
+                                        <span class="w-2 h-2 absolute right-1 bottom-0 bg-green-300 rounded-full"></span>
+                                    </div>
+                                    
+                                    <div class="">
+                                        <p class="text-xs md:max-xl:text-sm">Post title: <span class="w-1 h-1 bg-gray-500 rounded-full">&nbsp;</span> {{ notif.date_added|naturaltime }} </p>
+                                        <p class="text-xs md:max-xl:text-base">{{ notif.message }}</p>
+                                    </div> 
+                                </div>
+                            {% endfor %}
+
+                        {% else %}
+
+                            <p class="text-center p-5">You have 0 notifications</p>
+                        {% endif %}
+                        
+                        
+                        <div class="bg-gray-400 rounded-b-lg">
+                            <a href="" class="block text-center m-auto h-[50px] flex justify-center items-center hover:underline text-white">See All ({{ notifications.receiver.count }})</a>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <div class="ml-6">
+                    <i class="fa fa-users text-2xl cursor-pointer" aria-hidden="true" data-tooltip-target="tooltip-community" data-tooltip-placement="bottom"></i>
+                </div>
+
+                <div class="ml-6">
+                    <i class="fa fa-comments-o text-2xl cursor-pointer" aria-hidden="true" data-tooltip-target="tooltip-message" data-tooltip-placement="bottom"></i>
+                </div>
+                
+            </div>
+            
+
+            <div id="tooltip-home" role="tooltip" class="absolute z-10 
+                invisible px-3 py-2 text-xs font-medium text-white 
+                transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm 
+                opacity-0 tooltip dark:bg-gray-700">
+                    Home Page
+                <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+
+            <div id="tooltip-notif" role="tooltip" class="absolute z-10 
+                invisible px-3 py-2 text-xs font-medium text-white 
+                transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm 
+                opacity-0 tooltip dark:bg-gray-700">
+                    Notifications
+                <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+
+            <div id="tooltip-community" role="tooltip" class="absolute z-10 
+                invisible px-3 py-2 text-xs font-medium text-white 
+                transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm 
+                opacity-0 tooltip dark:bg-gray-700">
+                    Communities
+                <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+
+            <div id="tooltip-message" role="tooltip" class="absolute z-10 
+                invisible px-3 py-2 text-xs font-medium text-white 
+                transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm 
+                opacity-0 tooltip dark:bg-gray-700">
+                    Messages
+                <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+
+            <div id="tooltip-settings" role="tooltip" class="absolute z-10 
+                invisible px-3 py-2 text-xs font-medium text-white 
+                transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm 
+                opacity-0 tooltip dark:bg-gray-700">
+                    Settings
+                <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+            
+        </div>
+        
+    </div>
+    <div class="relative hidden xl:block xl:col-start-5 xl:col-end-5  xl:place-self-end xl:self-center xl:w-max md:w-full">
+        <div class="text-2xl cursor-pointer  flex items-center justify-end gap-3 hover:border-[1px] border-gray-600 w-[220px] p-2" id="profile">
+            <h1 class="text-right"> {{ request.user.username }}</h1>
+            <div id="profile-menu" class="hidden absolute top-10 right-0 bg-gray-200  rounded-md shadow-xl py-2 pb-4">
+                <ul class="list-none flex flex-col gap-[20px] items-center justify-center w-[12em] h-full font-light">
+            
+                    <li class="cursor-pointer w-full hover:bg-gray-300">
+                        <a href="{% url 'user' request.user.id 'posts' %}" class="flex items-center gap-2 w-full p-2">
+
+                            <div class="w-10 h-10 bg-red-200 rounded-[50%] relative overflow-hidden">
+                                <img src="{{ request.user.get_user_photo_url}}" alt="{{ user.username }}"  class="h-full w-full object-cover"/>
+                                <span class="w-2 h-2 absolute right-1 bottom-0 bg-green-300 rounded-full"></span>
+                            </div>
+                            <p class=" rounded-full bg-blue-300 relative">
+                                
+                            </p>
+                            <div class="">
+                                <p class="text-sm">View Profile</p>
+                                <p class="text-[25px]">{{ request.user.username }}</p>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="cursor-pointer w-full hover:bg-gray-300 h-[60px]">
+                        <a href="{% url 'settings' 'account' %}" class="flex items-center p-3 pl-4 gap-2">
+                            <i class="fa fa-cog" aria-hidden="true"></i>
+                            Settings
+                        </a>
+                    </li>
+                    <li class="cursor-pointer w-full hover:bg-gray-300 h-[60px]">
+                        <a href="{% url 'logout' %}" class=" flex items-center p-3 pl-4 gap-2">
+                            <i class="fa fa-sign-out" aria-hidden="true"></i>
+                            <p>Logout</p>
+                        </a>
+                    </li>
+                    
+                </ul>
+                
+            </div>
+            <i class="fa fa-arrow-down text-sm" aria-hidden="true"></i>
+        </div>
+        
+        
+    </div>
+    
+    
+</header>
+<div class="fixed top-0 bottom-0 -left-[100%]  w-[250px] bg-gray-300 h-full z-50  ease-in-out duration-300 font-thin" id="menu">
+    <a href="{% url 'home' %}" class="text-4xl border-b mb-6 border-black w-full block p-[9.5px]">PostBook</a>
+    <i class="fa fa-times text-xl cursor-pointer hover: absolute top-3 right-2 p-2" id="menu_close" aria-hidden="true"></i>
+    <ul class="text-lg">
+        <li class="cursor-pointer w-full hover:bg-gray-300 mb-4">
+            <a href="{% url 'user' request.user.id 'posts' %}" class="flex flex-col items-center justify-center text-center gap-2 w-full p-2">
+
+                <div class="w-[150px] h-[150px] bg-red-200 rounded-[50%] relative overflow-hidden">
+                    <img src="{{ request.user.get_user_photo_url}}" alt="{{ user.username }}"  class="h-full w-full object-cover"/>
+                    <span class="w-2 h-2 absolute right-1 bottom-0 bg-green-300 rounded-full"></span>
+                </div>
+                <p class=" rounded-full bg-blue-300 relative">
+                    
+                </p>
+                <div class="">
+                    <p class="text-[25px]">u/{{ request.user.username }}</p>
+                </div>
+            </a>
+        </li> 
+        <li class="cursor-pointer w-full hover:bg-gray-300 h-[60px] border-t-[1px] border-black">
+            <a href="{% url 'user' request.user.id 'posts' %}" class="flex items-center p-3 pl-4 gap-2">
+                <i class="fa fa-user" aria-hidden="true"></i>
+                Profile
+            </a>
+        </li>  
+        <li class="cursor-pointer w-full hover:bg-gray-300 h-[60px] border-t-[1px] border-black">
+            <a href="{% url 'settings' 'account' %}" class="flex items-center p-3 pl-4 gap-2">
+                <i class="fa fa-cog" aria-hidden="true"></i>
+                Settings
+            </a>
+        </li>
+        <li class="cursor-pointer w-full hover:bg-gray-300 h-[60px] border-y-[1px] border-black">
+            <a href="{% url 'logout' %}" class=" flex items-center p-3 pl-4 gap-2">
+                <i class="fa fa-sign-out" aria-hidden="true"></i>
+                <p>Logout</p>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<div class="hidden fixed top-0 bottom-0 right-0 left-0 bg-gray-200 z-[100] m-0 p-0 ease-in-out duration-300 " id="search">
+    
+    <div class="flex flex-col items-center  w-full p-2 pl-10 mr-4">
+        <i class="fa fa-arrow-left absolute top-3 left-1 cursor-pointer hover:bg-gray-400 text-2xl rounded-full w-8 h-8 text-center" aria-hidden="true" id="close_search"></i>
+        <div class="flex relative mx-2 w-full">
+            <i class="fa fa-search absolute left-2 z-50 top-3 bottom-3 " aria-hidden="true"></i>
+            <input type="text" name="search" placeholder="Search Postbook " class="pl-7 w-full rounded-full font-sans hover:bg-white/75 " id="search_input" />
+            
+        </div>
+    </div>
+    <div class=" w-full pl-7 bg-gray-400 top-[3.1em]  py-4 border-t-[1px] border-gray-200" id="search_menu">
+        Search History
+    </div>
+    
+</div>
+
+<div class="hidden notif_menu md:max-xl:notif_none fixed top-0 bottom-0 right-0 left-0 bg-gray-200 z-50 m-0 p-0 ease-in-out duration-300 " id="notifications">
+    <div class="p-3 border-b-[1px] border-gray-600 flex items-center">
+        <i class="fa fa-arrow-left cursor-pointer hover:bg-gray-400 text-2xl rounded-full w-8 h-8 text-center" aria-hidden="true" id="close_notif_menu"></i>
+        Notifications
+        <a href="{% url 'settings' 'account' %}">
+            <i class="fa fa-cog absolute top-5 right-2" aria-hidden="true" data-tooltip-target="tooltip-settings" data-tooltip-placement="bottom"></i>   
+        </a>
+         
+    </div>
+
+    <!-- put for loop here -->
+    {% if notifications %}
+
+        {% for notif in notifications|slice:":3" %}
+            <div class="p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-300 {% if notif.is_read == False %} bg-blue-200  {% endif %}">
+                <div class="w-10 h-10 bg-red-200 rounded-[50%] relative overflow-hidden">
+                    <img src="{{ notif.sender.get_user_photo_url}}" alt="{{ notif.sender.username }}"  class="h-full w-full object-cover"/>
+                    <span class="w-2 h-2 absolute right-1 bottom-0 bg-green-300 rounded-full"></span>
+                </div>
+                
+                <div class="">
+                    <p class="text-xs md:max-xl:text-sm">Post title: <span class="w-1 h-1 bg-gray-500 rounded-full">&nbsp;</span> {{ notif.date_added|naturaltime }} </p>
+                    <p class="text-xs md:max-xl:text-base">{{ notif.message }}</p>
+                </div> 
+            </div>
+        {% endfor %}
+
+    {% else %}
+
+        <p class="text-center p-5">You have 0 notifications</p>
+    {% endif %}
+    
+    
+    <div class="bg-gray-400">
+        <a href="" class="block text-center m-auto h-[50px] flex justify-center items-center hover:underline text-white">See All ({{ notifications.receiver.count }})</a>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    let profile_div = document.getElementById('profile')
+    let notif_btn = document.getElementById('notif_btn')
+    let notif_menu = document.getElementsByClassName('notif_menu')
+    let notif = document.getElementsByClassName('notif')
+    let menu = document.getElementById('menu')
+    let side_menu_btn = document.getElementById('side_menu')
+    let menu_close_btn = document.getElementById('menu_close')
+    let close_notif_menu = document.getElementById('close_notif_menu')
+
+    let search = document.getElementById('search')
+    let mobile_search_icon = document.getElementById('mobile_search_icon')
+    let close_search = document.getElementById('close_search')  
+
+    notif_btn.addEventListener('click', function(e){
+
+        // this means on a MD screen
+        if (window.innerWidth <=768){
+            if (notif_menu[0].classList.contains('hidden')){
+                notif_menu[0].classList.remove('hidden')
+            }else{
+                notif_menu[0].classList.add('hidden')
+            }
+        }
+        else {
+            if (notif[0].classList.contains('hidden')){
+                notif[0].classList.remove('hidden')
+            }else{
+                notif[0].classList.add('hidden')
+            }
+        }  
+    })
+
+    close_notif_menu.addEventListener('click', function(e){
+        notif_menu[0].classList.add('hidden')
+    })
+
+    side_menu_btn.addEventListener('click', function(e){
+        menu.classList.remove('-left-[100%]')
+        menu.classList.add('left-0')
+        console.log('CLICKED')
+    })
+
+    menu_close_btn.addEventListener('click', function(e){
+        menu.classList.add('-left-[100%]')
+        menu.classList.remove('left-0')
+    })
+
+    close_search.addEventListener('click', function(e){
+        search.classList.add('hidden')
+    })
+
+    mobile_search_icon.addEventListener('click', function(e){
+        search.classList.remove('hidden')
+    })
+
+    profile_div.addEventListener('click', function(e) {
+        
+        let profile_menu = document.getElementById('profile-menu')
+        if (profile_menu.classList.contains('hidden')){
+            profile_menu.classList.remove('hidden')
+        } else {
+            profile_menu.classList.add('hidden')
+        }
+    })
+
+    $(document).on('click', document, function(e){
+
+        if (e.target.id === 'search_input'){
+            const search_form = document.querySelector('#search_form');
+            const search_menu = document.querySelector('#search_menu');
+            
+            if (search_form.classList.contains('bg-gray-400')){
+                search_form.classList.remove('bg-gray-400')
+                search_menu.classList.add('hidden')
+            } else {
+                search_form.classList.add('bg-gray-400')
+                search_menu.classList.remove('hidden')
+            }
+            
+        }
+    })
+
+    
+
+    /*document.getElementById('search_input').addEventListener('keyup', async (e) => {
+        console.log(e.target.value)
+
+        if (e.key === 'Enter' || e.keyCode === 13){
+            console.log('enter press')
+            $.ajax({
+            url: `/get-search-results/${e.target.value}/`,
+            async: true,
+            type: 'GET',
+            success: function(res){
+                console.log(res.message)
+            }
+            })
+        }
+        
+    })*/
+
+
+    
+</script>

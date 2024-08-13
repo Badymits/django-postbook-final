@@ -1,0 +1,134 @@
+{% load custom_tags %}
+{% load humanize %}
+
+{% for reply in replies %}
+    <!-- recursive approach to display nested replies -->
+        <div class="mb-6 pl-[2em] md:pl-[2em]">
+            <div class="border-l-[2px] border-gray-400" id="comment_thread">
+                <div class="flex items-center gap-2 relative pl-2 text-xs">
+                
+                    <div class="w-10 h-10 rounded-[50%] relative overflow-hidden">
+                        <img src="{{ reply.get_photo_url }}" alt="{{ reply.user.username }}"  class="h-full w-full object-cover"/>
+                        <span class="w-2 h-2 absolute right-1 bottom-0 bg-green-300 rounded-full"></span>
+                    </div>
+                    
+                    <p>
+                        <a href="{% url 'user' reply.user.id 'posts' %}" class="text-lg hover:underline cursor-pointer" id="comment_user">{{ reply.user.username }}</a> 
+                    </p>
+                    
+                    <span class="w-1 h-1 bg-black rounded-full">&nbsp;</span>
+                    <p class=" text-gray-500 comment_date" id="comment_date"> {{ reply.date_posted|naturaltime }}</p>
+
+                    {% if reply.is_edited and reply.is_deleted == False %}
+                        <p class="text-gray-500" id="comment_edit_flag"> (edited) </p>
+                    {% endif %}
+                    <div class="absolute right-0 w-7 text-center text-2xl top-0 {% if reply.is_deleted == True %} pointer-events-none {% endif %}">
+                        <p class="hover:bg-gray-400 cursor-pointer rounded-md" id="comment_menu" >...</p>
+
+                        <div class="hidden absolute right-2 bg-gray-400 rounded-md w-[4em] y-1 flex flex-col justify-center divide-gray-600"
+                            id="comment_options">
+                            <input type="hidden" name="" id="comment_id" value="{{ reply.id }}">
+                            {% if request.user == reply.user %}
+                                <button class="text-xs  px-2 py-1 hover:bg-gray-500 hover:rounded-t-md border-b-[1px] border-gray-600" id="edit_btn" value="{{ reply.id }}" >Edit</button>
+                                <button class="text-xs  px-2 py-1 hover:bg-gray-500 border-b-[1px] border-gray-600" id="delete_btn" value="{{ reply.id }}" >Delete</button>
+                            {% endif %}
+                            <button class="text-xs px-2 py-1 hover:bg-gray-500 hover:rounded-b-md">Report</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pl-[3.5em] py-2 " id="comment_body_div">
+                    {% if reply.is_deleted %}
+                        <p class="font-semibold">[Deleted]</p>
+                    {% else %}
+                        <input type="hidden" id="comment_text_prev" value="{{ reply.body }}">
+                        <p class="text-sm md:text-lg xl:text-lg" id="comment_body" data-comment-id="{{ reply.id }}">{{ reply.body }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="text-xs md:text-base mb-[3.3em] relative pl-[3px] {% if reply.is_deleted == True %} pointer-events-none {% endif %}" id="comment_actions">
+                    <button class="flex items-center gap-2 absolute top-5 left-[25px] md:left-[45px] hover:bg-gray-300  px-2 py-2 rounded-md" id="comment_like_btn_parent">
+                        {% commentLike reply.id request.user as liked %}
+                        {% if liked %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"  data-option="like"
+                            class="text-red-400" id="comment_like_btn" data-comment="{{ reply.id }}">
+                            <path fill="currentColor" id="comment_like_btn" data-comment="{{ reply.id }}"  data-option="like"
+                            d="M12.781 2.375c-.381-.475-1.181-.475-1.562 0l-8 10A1.001 1.001 0 0 0 4 14h4v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7h4a1.001 1.001 0 0 0 .781-1.625zM15 12h-1v8h-4v-8H6.081L12 4.601L17.919 12z"/>
+                        </svg> 
+                        {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"  data-option="like"
+                            class="hover:text-red-400" id="comment_like_btn" data-comment="{{ reply.id }}">
+                            <path fill="currentColor" id="comment_like_btn" data-comment="{{ reply.id }}"  data-option="like"
+                            d="M12.781 2.375c-.381-.475-1.181-.475-1.562 0l-8 10A1.001 1.001 0 0 0 4 14h4v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7h4a1.001 1.001 0 0 0 .781-1.625zM15 12h-1v8h-4v-8H6.081L12 4.601L17.919 12z"/>
+                        </svg> 
+                        {% endif %}
+                        <p id="comment_like_count">{% getCommentVoteCount reply request.user 'like' %}</p>
+                    </button>
+                    <button class="flex items-center gap-2 absolute top-5 left-[85px] md:left-[125px] hover:bg-gray-300  px-2 py-2 rounded-md" id="comment_dislike_btn_parent">
+                        {% commentDislike reply.id request.user as disliked %}
+                        {% if disliked %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" data-option="dislike"
+                            class="text-blue-400" id="comment_dislike_btn" data-comment="{{ reply.id }}">
+                            <path fill="currentColor"  id="comment_dislike_btn" data-comment="{{ reply.id }}" data-option="dislike"
+                            d="M20.901 10.566A1.001 1.001 0 0 0 20 10h-4V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v7H4a1.001 1.001 0 0 0-.781 1.625l8 10a1 1 0 0 0 1.562 0l8-10c.24-.301.286-.712.12-1.059M12 19.399L6.081 12H10V4h4v8h3.919z"/>
+                        </svg>
+                        {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" data-option="dislike"
+                            class="hover:text-blue-400" id="comment_dislike_btn" data-comment="{{ reply.id }}">
+                            <path fill="currentColor"  id="comment_dislike_btn" data-comment="{{ reply.id }}" data-option="dislike"
+                            d="M20.901 10.566A1.001 1.001 0 0 0 20 10h-4V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v7H4a1.001 1.001 0 0 0-.781 1.625l8 10a1 1 0 0 0 1.562 0l8-10c.24-.301.286-.712.12-1.059M12 19.399L6.081 12H10V4h4v8h3.919z"/>
+                        </svg>
+                        {% endif %}
+                        <p id="comment_dislike_count">{% getCommentVoteCount reply request.user 'dislike'  %}</p>
+                    </button>
+                    <button class="absolute top-5 left-[160px] md:left-[210px] hover:bg-gray-400 px-2 py-2 rounded-md" id="comment_reply" value="{{ reply.id }}" data-level="{{ reply.comment_level }}">Reply</button>
+                    
+                </div>
+                <br>
+                {% if reply.has_replies %}
+                    {% include 'home/nested_template.html' with replies=reply.get_replies %} 
+                {% else %}
+                    <div class="pl-[3em]" id="comment_replies">
+
+                    </div>
+                {% endif %}
+                <div class="hidden md:hidden fixed top-0 bottom-0 right-0 left-0 bg-gray-100 z-50 m-0 p-0" id="reply_div">
+                    <div class="flex justify-between items-center p-3">
+                        <h1 class="flex">
+                            Replying to <p class="text-blue-600 ml-1" id="main_comment_user"> (main comment reply username) </p>
+                        </h1>
+                        <!-- add the body of the main comment that the user is replying to -->
+                        <p class="text-gray-500" id="main_comment_body"> (main comment body) </p>
+                    </div>
+                    
+                    
+                    <div class="mx-2">
+                        <input type="hidden" value="" id="target_user">
+                        <input type="hidden" value="" id="main_comment_id">
+                        <textarea class="w-full p-2" placeholder="Text here..." name="" id="body" cols="30" rows="10" required></textarea>
+                        <input type="hidden" value="mobile" id="is_mobile_flag">
+                        <button class="float-right bg-blue-600 w-[90px] h-[30px] rounded-full mb-[10px] text-white text-center text-sm hover:bg-gray-100 hover:text-black" id="reply_comment_btn_mobile">Reply</button>
+                        <button class="float-right mr-5 bg-white w-[90px] h-[30px] rounded-full mb-[10px] text-black text-center text-sm hover:bg-gray-100 hover:text-black" id="cancel_reply_btn_mobile">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="hidden md:hidden fixed top-0 bottom-0 right-0 left-0 bg-gray-100 z-50 m-0 p-0" id="edit_comment_template_mobile">
+                    <h1 class="p-3">Editing Comment</h1>
+                    <div class="mx-2">
+
+                        <input type="hidden" value="" id="comment_old_value">
+                        <textarea class="w-full p-2" placeholder="Text here..." name="" id="body" cols="30" rows="10" required></textarea>
+
+                        <button class="float-right bg-blue-600 w-[90px] h-[30px] rounded-full mb-[10px] text-white text-center text-sm hover:bg-gray-100" id="save_edit_btn_mobile" value="">Save</button>
+                        <button class="float-right mr-5 bg-white w-[90px] h-[30px] rounded-full mb-[10px] text-black text-center text-sm hover:bg-gray-100" id="cancel_edit_btn_mobile">Cancel</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    
+{% endfor %}
+
+    
+
+        

@@ -1,0 +1,63 @@
+{% load static %}
+<div class="w-full md:w-[70%] h-full">
+
+    <div class=" p-3 border-b-[1px] border-gray-600 flex items-center md:hidden">
+        <!-- figure this out -->
+        <a href="{{ request.META.HTTP_REFERER|escape }}">
+            
+        </a>
+        <i class="fa fa-arrow-left cursor-pointer hover:bg-gray-400 text-2xl rounded-full w-8 h-8 text-center" aria-hidden="true" id="close_settings"></i>
+            Customize Profile
+        
+    </div>
+    <h1 class="text-2xl hidden md:block">Customize Profile</h1>
+    <form action="{% url 'edit-profile' user.id %}" method="post" class="relative mx-2 md:mx-0 "  enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="">
+            <h1 class="border-b-[1px] border-gray-700 mt-10 text-sm font-normal pb-2">Profile Information</h1>
+
+            <label for="" class="block pt-[1em] text-sm md:text-lg">Bio (optional)</label>
+            <p class="text-xs md:text-sm text-gray-600">A brief description about yourself shown on your profile. </p>
+
+            {% if user.bio %}
+            <textarea name="bio" class="w-full md:w-[70%] my-4 text-md p-2 resize-none border-2 border-gray-200" 
+                placeholder="Bio (optional)"
+                id="" 
+                cols="30" 
+                rows="5">{{user.bio}}</textarea>
+            {% else %}
+            <textarea name="bio" class="w-full md:w-[70%] my-4 text-md p-2 resize-none border-2 border-gray-200" 
+                placeholder="Bio (optional)"
+                id="" 
+                cols="30" 
+                rows="5"></textarea>
+            {% endif %}
+        </div>
+
+        <div class="mb-4">
+
+            <h1 class="border-b-[1px] border-gray-700 mt-14 mb-6 text-sm font-normal">Images </h1>
+            <label for="" class="block text-sm md:text-lg">Profile and Banner image </label>
+            <p class="text-xs md:text-sm py-1 mb-2 text-gray-600">Images must be in .jpg or .png format</p>
+            
+            <div class=" pt-4 flex flex-wrap items-center  gap-6 relative">
+                <div>
+                    <input type="file" src="" alt="" name="profile_pic" accept="image/*" onchange="readURL(this, 'profile')" class="border-[1px] text-xs">
+                    <img src="{% if user.profile_pic %} {{ user.profile_pic.url }} {% else %} {% static '/images/images/download.jpg' %} {% endif %}" alt="" id="img-preview-profile" 
+                    class="object-contain w-[200px] h-[200px] border-[1px] border-solid my-2" >
+                </div>
+    
+                <div>
+                    <input type="file" src="" alt="" name="banner_pic" accept="image/*" onchange="readURL(this, 'banner')" class="border-[1px] text-xs">
+                    <img src="{% if user.banner_pic %} {{ user.banner_pic.url }} {% else %} {% static '/images/images/download.jpg' %} {% endif %}" alt="" id="img-preview-banner" 
+                    class="bg-contain border-[1px]  my-2 " >
+                </div>
+            </div>
+            
+        </div>
+        <button type="submit" class="block mb-[10px] border-[1px] border-blue-400 absolute -bottom-[3em]  rounded-full w-[140px] hover:bg-blue-400 duration-100 text-sm md:text-lg">Save Changes</button>
+        
+    </form>
+    <div class="mt-[6em]">&nbsp;</div>
+    
+</div>

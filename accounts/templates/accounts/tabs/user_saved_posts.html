@@ -1,0 +1,104 @@
+{% load custom_tags %}
+{% load humanize %}
+
+{% if user_saved_posts %}
+    {% for post in user_saved_posts %}
+            
+    <div class="flex w-full bg-gray-200 mb-6 relative   rounded-sm hover:border-black border-[1px] cursor-pointer">
+        <div class="w-[50px] bg-gray-300 border-r-[1px] border-black px-4">
+            <div class=" flex flex-col items-center gap-2 py-2" id="vote_div">
+                <input type="hidden" value="{{ post.post.user.username }}" id="post_user">
+                <button class="flex items-center gap-2 text-xl hover:bg-gray-300 rounded-md " id="like_btn_parent">
+                    {% is_liked post.post.id request.user as liked %}
+                    {% if liked %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"  data-option="like"
+                            class="text-red-400" id="like_btn" data-post="{{ post.post.id }}">
+                            <path fill="currentColor" id="like_btn" data-post="{{ post.post.id }}"  data-option="like"
+                            d="M12.781 2.375c-.381-.475-1.181-.475-1.562 0l-8 10A1.001 1.001 0 0 0 4 14h4v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7h4a1.001 1.001 0 0 0 .781-1.625zM15 12h-1v8h-4v-8H6.081L12 4.601L17.919 12z"/>
+                        </svg>    
+                    {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" 
+                            class="hover:text-red-400" id="like_post_btn" data-post="{{ post.post.id }}" data-option="like">
+                            <path fill="currentColor" id="like_btn" data-post="{{ post.post.id }}"  data-option="like"
+                            d="M12.781 2.375c-.381-.475-1.181-.475-1.562 0l-8 10A1.001 1.001 0 0 0 4 14h4v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7h4a1.001 1.001 0 0 0 .781-1.625zM15 12h-1v8h-4v-8H6.081L12 4.601L17.919 12z"/>
+                        </svg>  
+                    {% endif %}
+                    <p id="like_count"> {{ post.post.get_likes }} </p>
+                </button>
+                <button class=" flex items-center gap-2 text-xl hover:bg-gray-300  rounded-md" id="dislike_btn_parent">
+                    {% is_disliked post.post.id request.user as disliked %}
+                    {% if disliked %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" data-option="dislike"
+                        class="text-blue-400" id="dislike_btn" data-post="{{ post.post.id }}">
+                        <path fill="currentColor"  id="dislike_btn" data-post="{{ post.post.id }}" data-option="dislike"
+                        d="M20.901 10.566A1.001 1.001 0 0 0 20 10h-4V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v7H4a1.001 1.001 0 0 0-.781 1.625l8 10a1 1 0 0 0 1.562 0l8-10c.24-.301.286-.712.12-1.059M12 19.399L6.081 12H10V4h4v8h3.919z"/>
+                    </svg>
+                    {% else %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" data-option="dislike"
+                        class="hover:text-blue-400" id="dislike_btn" data-post="{{ post.post.id }}">
+                        <path fill="currentColor"  id="dislike_btn" data-post="{{ post.post.id }}" data-option="dislike"
+                        d="M20.901 10.566A1.001 1.001 0 0 0 20 10h-4V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v7H4a1.001 1.001 0 0 0-.781 1.625l8 10a1 1 0 0 0 1.562 0l8-10c.24-.301.286-.712.12-1.059M12 19.399L6.081 12H10V4h4v8h3.919z"/>
+                    </svg>
+                    {% endif %}
+                    <p id="dislike_count"> {{ post.post.get_dislikes }} </p>
+                </button>
+                
+            </div>
+        </div>
+        <div class="py-4 w-full" id="post_container">
+            <div class="px-3" id="post-div">
+                <input type="hidden" name="post_id" id="post_id" value="{{ post.post.id }}" class="post_id">
+                <p class="text-4xl pb-2" id="post_title">{{ post.post.title }}</p>
+                <p class="text-sm font-thin">Posted by: <a href="{% url 'user' post.post.user.id 'posts'  %}" class="hover:underline"> {{ post.post.user.username }} </a> {{ post.post.date_posted|naturaltime }}</p>
+                
+                {% if post.post.image %}
+
+                    <img src="{{ post.post.image.url }}" alt="{{ post.post.image }}" class="bg-contain my-4">
+
+                {% endif %}
+
+                {% if post.post.body %}
+                    <p class="pt-3 mb-2">{{ post.post.body }}</p>
+                {% endif %}
+            </div>
+
+            <div class="h-[50px] flex items-center justify-start pt-5 text-xs md:max-xl:text-base relative border-t-[1px] border-gray-500" id="post_actions">
+            
+                <div class="hover:bg-gray-300 flex items-center justify-center ml-2 xl:mx-2 gap-1 py-4 ">
+                    <i class="fa fa-comments-o" aria-hidden="true"></i>
+                    <p>{{ post.post.comment_set.all|length }} {{ post.post.comment_set.count|pluralize:"comment,comments" }}</p>
+                </div>
+
+                <button class="hover:bg-gray-300 flex items-center justify-center xl:mx-2 gap-1 py-4 px-3 block" id="share_post_btn" value="{{ post.post.id }}" data-post-id="{{ post.post.id }}">
+                    <i class="fa fa-share-square-o" aria-hidden="true" id="share_post_btn" data-post-id="{{ post.post.id }}"></i>
+                    <p id="share_post_btn" data-post-id="{{ post.post.id }}">Share post</p>
+                </button>
+
+                <button class="hover:bg-gray-300 flex items-center justify-center xl:mx-2 gap-1 py-4 px-2 block" id="save_post_btn_parent" value="{{ post.post.id }}" data-post-id="{{ post.post.id }}" data-user="{{ request.user }}">
+
+                    <!-- wrapping the if condition within the text/p element will interfere with the event delegation. It wont detect this element. -->
+                    {% is_saved post.post.id request.user as post_saved %}
+                    {% if post_saved %}
+                        <i class="fa fa-bookmark" aria-hidden="true" id="save_post_btn" data-post-id="{{ post.post.id }}" data-user="{{ request.user }}"></i>
+                        <p class="save_text" id="save_post_btn" data-post-id="{{ post.post.id }}" data-user="{{ request.user }}">
+                            Remove from saved
+                        </p>
+                    {% else %}  
+                        <i class="fa fa-bookmark-o" aria-hidden="true" id="save_post_btn" data-post-id="{{ post.post.id }}" data-user="{{ request.user }}"></i>
+                        <p class="save_text" id="save_post_btn" data-post-id="{{ post.post.id }}" data-user="{{ request.user }}">
+                            Save
+                        </p>
+                    {% endif %}
+                </button>
+                
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No posts found Browse <a href="{% url 'home' %}" class="decoration-sky-300">here</a> to find interisting posts!</p>
+{% endif %}
+    
+
+
+

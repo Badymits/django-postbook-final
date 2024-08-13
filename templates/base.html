@@ -1,0 +1,69 @@
+{% load static %}
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> <!-- ajax -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script> <!-- jquery -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> <!-- for icons -->
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
+    <title>Postbook</title>
+    
+    <style type="text/tailwindcss">
+        @layer utilities{
+            .active-tab{
+                @apply bg-gray-300 rounded-full
+            }
+
+            .settings-tab{
+                @apply md:decoration-2 md:underline underline-offset-auto md:underline-offset-[4px] 
+            }
+
+            .settings-tab-mobile{
+                @apply fixed top-0 bottom-0 right-0 left-0 w-full bg-white z-[100] ease-in-out duration-300 overflow-y-auto
+            }
+        }
+    </style>
+    {% tailwind_css %}
+</head>
+<body>
+    {% if request.user.is_authenticated %}
+        {% include 'snippets/header.html' %}
+        <div class="h-screen w-full pt-[5em] overflow">
+            {% block content %}
+
+            {% endblock %}
+        </div>
+        
+        <div class="fixed left-3 bottom-3 mx-auto block h-[110px] w-[300px] hidden
+         border-blue-400 border-[1px] bg-sky-200 flex items-start justify-start rounded-md" id="message_notif">
+            
+            <div class="block w-9 h-9 rounded-[50%] relative overflow-hidden absolute top-3 left-2 m-1">
+                <img src="" alt="{{ request.user.username }}" id="sender_profile"  class="h-full w-full object-cover"/>
+                <span class="w-2 h-2 absolute right-1 bottom-0 bg-green-300 rounded-full"></span>
+            </div>
+            
+            <div class="flex flex-col items-start justify-center p-2 pl-4 break-all">
+                <h1 id="message_header" class="">Headline</h1>
+                <p id="message_text" class="">Message here</p>
+            </div>
+
+            <a href="" class="absolute bottom-2 left-10 underline block mx-auto">Click to redirect</a>
+            
+            <i  id="message_close"
+                class="fa fa-times absolute top-2 right-2 text-lg cursor-pointer text-blue-600 
+                hover:bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center" 
+                aria-hidden="true">
+            </i>
+        </div>
+    {% endif %}
+    
+</body>
+<!-- for tooltip css -->
+<script type="text/javascript" src="{% static 'js/events.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+</html>

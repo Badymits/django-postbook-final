@@ -1,0 +1,101 @@
+{% load custom_tags %}
+
+
+<div>
+    
+    {% if user_comments %}
+        {% for comment in user_comments %}
+        <div class="w-full pb-2 mb-4 cursor-pointer" id="comment_container" onclick="">
+            <div class="border-b-[1px] border-gray-400 " id="comment_thread">
+                <div class="flex items-center gap-2 relative pl-2">
+                
+                    <p class="w-10 h-10 rounded-full bg-blue-300 ">
+                    
+                    
+                    <p class="text-lg hover:underline cursor-pointer" id="comment_user">Group name </p> 
+                    <span class="w-1 h-1 bg-black rounded-full">&nbsp;</span>
+
+                    <a href="{% url 'detail-post' comment.main_post.id %}" class="text-md hover:underline cursor-pointer" id="comment_user">{{ comment.main_post.title }}</> 
+                    
+                    
+                </div>
+                    
+                <div class="pl-[3.5em] py-2 " id="comment_body_div">
+                    <div class="flex flex-col xl:flex-row items-start xl:items-center text-xs xl:text-sm mb-2">
+                        {% if comment.is_reply %}
+                            <p class="flex items-center mb-1 xl:m-0"> 
+                                <a href="{% url 'user' comment.user.id 'posts' %}" class="text-gray-500 hover:underline"> {{ comment.user.username }} </a>
+                                &nbsp;
+                                is replying to 
+                                &nbsp;
+                                <a href="{% url 'user' comment.get_reply.user.id 'posts' %}" class="text-gray-500 hover:underline"> {{ comment.get_reply.user.username }} </a>
+                            </p>
+                            <p class="xl:pl-2" id="comment_date">commented {{ comment.date_posted|timesince }} ago</p> 
+                            <!-- putting the comment date below the if statement was the original placement. But had to be duplicated to fit the needs of this flexbox -->
+                        {% else %}
+                            <p class=""> 
+                                <a href="{% url 'user' comment.user.id 'posts'  %}" class="text-gray-500 hover:underline">{{ comment.user.username }}</a>  
+                            </p>
+                            <p class="xl:pl-2" id="comment_date">commented {{ comment.date_posted|timesince }} ago</p>
+                        {% endif %}
+                        
+                    </div>
+                    
+                    <input type="hidden" id="comment_text_prev" value="{{ comment.body }}">
+                    <p id="comment_body" >{{ comment.body }}</p>
+                </div>
+        
+                <div class="mb-[3.3em] relative pl-[3px] " id="comment_actions">                          
+                    <button class="flex items-center gap-2 absolute top-5 left-[45px] hover:bg-gray-300  px-2 py-2 rounded-md" id="comment_like_btn_parent">
+                        {% commentLike comment.id request.user as liked %}
+                        {% if liked %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"  data-option="like"
+                            class="text-red-400" id="comment_like_btn" data-comment="{{ comment.id }}">
+                            <path fill="currentColor" id="comment_like_btn" data-comment="{{ comment.id }}"  data-option="like"
+                            d="M12.781 2.375c-.381-.475-1.181-.475-1.562 0l-8 10A1.001 1.001 0 0 0 4 14h4v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7h4a1.001 1.001 0 0 0 .781-1.625zM15 12h-1v8h-4v-8H6.081L12 4.601L17.919 12z"/>
+                        </svg> 
+                        {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"  data-option="like"
+                            class="hover:text-red-400" id="comment_like_btn" data-comment="{{ comment.id }}">
+                            <path fill="currentColor" id="comment_like_btn" data-comment="{{ comment.id }}"  data-option="like"
+                            d="M12.781 2.375c-.381-.475-1.181-.475-1.562 0l-8 10A1.001 1.001 0 0 0 4 14h4v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7h4a1.001 1.001 0 0 0 .781-1.625zM15 12h-1v8h-4v-8H6.081L12 4.601L17.919 12z"/>
+                        </svg> 
+                        {% endif %}
+                        <p id="comment_like_count">{% getCommentVoteCount comment request.user 'like' %}</p>
+                    </button>
+                    <button class="flex items-center gap-2 absolute top-5 left-[125px] hover:bg-gray-300  px-2 py-2 rounded-md" id="comment_dislike_btn_parent">
+                        {% commentDislike comment.id request.user as disliked %}
+                        {% if disliked %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" data-option="dislike"
+                            class="text-blue-400" id="comment_dislike_btn" data-comment="{{ comment.id }}">
+                            <path fill="currentColor"  id="comment_dislike_btn" data-comment="{{ comment.id }}" data-option="dislike"
+                            d="M20.901 10.566A1.001 1.001 0 0 0 20 10h-4V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v7H4a1.001 1.001 0 0 0-.781 1.625l8 10a1 1 0 0 0 1.562 0l8-10c.24-.301.286-.712.12-1.059M12 19.399L6.081 12H10V4h4v8h3.919z"/>
+                        </svg>
+                        {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" data-option="dislike"
+                            class="hover:text-blue-400" id="comment_dislike_btn" data-comment="{{ comment.id }}">
+                            <path fill="currentColor"  id="comment_dislike_btn" data-comment="{{ comment.id }}" data-option="dislike"
+                            d="M20.901 10.566A1.001 1.001 0 0 0 20 10h-4V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v7H4a1.001 1.001 0 0 0-.781 1.625l8 10a1 1 0 0 0 1.562 0l8-10c.24-.301.286-.712.12-1.059M12 19.399L6.081 12H10V4h4v8h3.919z"/>
+                        </svg>
+                        {% endif %}
+                        <p id="comment_dislike_count">{% getCommentVoteCount comment request.user 'dislike'  %}</p>
+                    </button>
+
+                    <button class="absolute top-5 left-[210px] hover:bg-gray-400 px-2 py-2 rounded-md" 
+                        id="comment_reply" 
+                        value="{{ comment.id }}" 
+                        data-level="{{ comment.comment_level }}">
+                        Reply
+                    </button>
+                    
+                </div>
+                <br>
+            </div> 
+        </div>
+        {% endfor %}
+    {% else %}
+    <p>
+        Looks like there aren't any comments made... 
+    </p>
+    {% endif %}
+</div>

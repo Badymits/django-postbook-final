@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script> <!-- jquery -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> <!-- for icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>PostBook</title>
+</head>
+<body>
+    <section class="bg-gray-400 h-screen max-w-full flex items-center px-2">
+        <div class="bg-white w-full mx-2 xl:w-[50%]  md:w-[100%] m-0 block mx-auto rounded-lg p-2">
+            <h1 class="text-center text-sm xl:text-5xl md:text-4xl font-thin uppercase ">Register</h1>
+            {{ form.non_field_errors }}
+            <div >
+                <form action="{% url 'register' %}" method="post" class="flex flex-col items-center justify-center
+                 xl:w-[70%] md:w-[80%] mx-auto p-2 xl:text-lg text-sm">
+                    {% csrf_token %}
+                    {% for field in reg_form %}
+                        <div class="w-full text-left my-2  xl:text-lg">
+                            <label for="">{{ field.label }}</label>
+                            {{ field }}
+                            {{ field.errors }}
+                        </div>
+                        
+                    {% endfor %}
+                    <button type="submit" class="bg-blue-400 p-2 my-4 w-[9em] text-white rounded-lg uppercase">Register</button>
+                    <p class="mx-8 text-center mt-2">
+                        Already have an account? <br>
+                        <a href="{% url 'login' %}" class="decoration-sky-500 underline hover:decoration-2 duration-500">Click here </a>
+                        to log in!
+                    </p>
+                    
+                </form>
+            </div>  
+        </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.extra_tags != 'register' %} hidden {% endif %} 
+
+                    fixed left-0 right-0 top-[12px] md:top-[10px] xl:top-[5px] mx-auto block h-[50px] max-w-[300px] md:max-w-[500px] text-sm md:text-base  mx-2 
+                    
+                    bg-red-400 flex items-center rounded-md border-[1px] border-red-700" 
+                    id="home_message_notif">
+                    <p id="home_message_text" class="p-1 text-center w-full text-black">{{ message }}</p>
+
+                </div>
+
+            {% endfor %}
+        {% endif %}
+        
+    </section>
+</body>
+</html>

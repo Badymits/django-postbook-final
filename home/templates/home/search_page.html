@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% load humanize %}
+
+{% block content %}
+
+<section class="grid xl:grid-cols-5 md:grid-cols-7 gap-2">
+    <div class="col-start-1 col-end-7 md:col-start-2 md:col-end-7 xl:col-start-2 xl:col-end-4 mx-2">
+        <h1 class="flex text-xl">Search Results for: &nbsp;<p class="font-bold"> {{ keyword }} </p></h1>
+        <div>
+            {% if results %}
+                {% for result in results %}
+                    <p>{{ result }}</p>
+                {% endfor %}
+            {% else %}
+                <p>No results for {{ keyword }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        <div class="fixed">
+            <div class="bg-gray-100 h-[300px] lg:h-[400px] w-[280px] lg:w-[380px] rounded-lg p-4 hidden xl:block">
+                <p class="text-2xl font-thin">About PostBook...</p>
+                <br>
+                <p class="text-justify">
+                    This is a website that is inspired heavily by Reddit. I enjoy building websites
+                    particularly social media types since it has the basic CRUD functionalities which 
+                    is essential to know in most if not all programming apps. Yes I know there are many better 
+                    examples of social media apps like Facebook and X (formerly Twitter). Even the name of this app
+                    is derived from Facebook. But, this is a starting point for me so bear with it :P.
+                </p>
+                <p class="mt-5 text-lg w-full">
+                    Anyway...Enjoy
+                <br>  
+                </p>
+                <a href="{% url 'create-post' %}" class="bg-blue-200 hover:bg-blue-100 duration-100 block w-full text-center
+                    leading-10 rounded-full mt-2 text-lg">Create Post
+                </a>
+            </div>
+            <div class="mt-5 bg-gray-100 h-[300px] lg:h-[400px] w-[280px] lg:w-[380px] rounded-lg p-3 hidden xl:block overflow-auto">
+                <div class="flex items-center justify-between">
+                    <p>Recent Posts</p>
+                    <p class="cursor-pointer">Clear</p>
+                </div>
+                
+                <div class="h-[100px] bg-blue-400 hover:bg-blue-200 text-white hover:text-black mt-2 p-2 cursor-pointer rounded-md hover:border-black border-[1px]">
+                    <p>Sample post</p>
+                </div>
+                <div class="h-[100px] bg-blue-400 hover:bg-blue-200 text-white hover:text-black mt-2 p-2 cursor-pointer rounded-md hover:border-black border-[1px]">
+                    <p>Sample post</p>
+                </div>
+                <div class="h-[100px] bg-blue-400 hover:bg-blue-200 text-white hover:text-black mt-2 p-2 cursor-pointer rounded-md hover:border-black border-[1px]">
+                    <p>Sample post</p>
+                </div>
+                <div class="h-[100px] bg-blue-400 hover:bg-blue-200 text-white hover:text-black mt-2 p-2 cursor-pointer rounded-md hover:border-black border-[1px]">
+                    <p>Sample post</p>
+                </div>
+                <div class="h-[100px] bg-blue-400 hover:bg-blue-200 text-white hover:text-black mt-2 p-2 cursor-pointer rounded-md hover:border-black border-[1px]">
+                    <p>Sample post</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</section>
+
+
+{%  endblock content%}
+
+

@@ -1,0 +1,451 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+{% load humanize %}
+
+{% block content %}
+
+    <section class="grid xl:grid-cols-5 md:grid-cols-7 gap-2">
+        
+        <div class="col-start-1 col-end-7 md:col-start-2 md:col-end-7 xl:col-start-2 xl:col-end-4 mx-2">
+            <input type="hidden" value="{{ request.user.username }}" id="user">
+            <div class="w-full bg-gray-300 h-[60px] flex items-center justify-center w-full gap-[5px] px-4 rounded-xl">
+                
+                <a href="{% url 'user' request.user.id 'posts' %}" class="block w-14 h-11 bg-red-200 rounded-[50%] relative overflow-hidden cursor-pointer">
+                    <img src="{{ request.user.get_user_photo_url}}" alt="{{ request.user.username }}"  class="h-full w-full object-cover"/>
+                    <span class="w-2 h-2 absolute right-1 bottom-0 bg-green-300 rounded-full"></span>
+                </a>
+                
+                <input type="text" class="w-full h-[40px] rounded-lg" placeholder="Create Post" data-tooltip-target="tooltip-create" data-tooltip-placement="bottom" onclick='createPostUrl()'>
+
+                <div class="text-2xl px-1 cursor-pointer hover:bg-gray-400" >
+                    <i class="fa fa-file-image-o" aria-hidden="true"></i>
+                </div>
+
+                <div class="text-2xl px-1 cursor-pointer hover:bg-gray-400">
+                    <i class="fa fa-link" aria-hidden="true"></i>
+                </div>
+
+                <div id="tooltip-create" role="tooltip" class="absolute z-10 
+                    invisible px-3 py-2 text-xs font-medium text-white 
+                    transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm 
+                    opacity-0 tooltip dark:bg-gray-700 xl:hidden">
+                        Click to create Post
+                <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+            </div>
+            <div class="pt-2">
+                {% if posts %}
+                    {% for post in posts %}
+                        <div class="flex w-full bg-gray-200 mb-6 relative   rounded-sm hover:border-black border-[1px] cursor-pointer">
+                            <div class="w-[50px] bg-gray-300 border-r-[1px] border-black px-4">
+                                <div class=" flex flex-col items-center gap-2 py-2" id="vote_div">
+                                    <input type="hidden" value="{{ post.user.username }}" id="post_user">
+                                    <button class="flex items-center gap-2 text-xl hover:bg-gray-300 rounded-md " id="like_btn_parent">
+                                        {% is_liked post.id request.user as liked %}
+                                        {% if liked %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"  data-option="like"
+                                                class="text-red-400" id="like_btn" data-post="{{ post.id }}">
+                                                <path fill="currentColor" id="like_btn" data-post="{{ post.id }}"  data-option="like"
+                                                d="M12.781 2.375c-.381-.475-1.181-.475-1.562 0l-8 10A1.001 1.001 0 0 0 4 14h4v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7h4a1.001 1.001 0 0 0 .781-1.625zM15 12h-1v8h-4v-8H6.081L12 4.601L17.919 12z"/>
+                                            </svg>    
+                                        {% else %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" 
+                                                class="hover:text-red-400" id="like_post_btn" data-post="{{ post.id }}" data-option="like">
+                                                <path fill="currentColor" id="like_btn" data-post="{{ post.id }}"  data-option="like"
+                                                d="M12.781 2.375c-.381-.475-1.181-.475-1.562 0l-8 10A1.001 1.001 0 0 0 4 14h4v7a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-7h4a1.001 1.001 0 0 0 .781-1.625zM15 12h-1v8h-4v-8H6.081L12 4.601L17.919 12z"/>
+                                            </svg>  
+                                        {% endif %}
+                                        <p id="like_count"> {{ post.get_likes }} </p>
+                                    </button>
+                                    <button class=" flex items-center gap-2 text-xl hover:bg-gray-300  rounded-md" id="dislike_btn_parent">
+                                        {% is_disliked post.id request.user as disliked %}
+                                        {% if disliked %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" data-option="dislike"
+                                            class="text-blue-400" id="dislike_btn" data-post="{{ post.id }}">
+                                            <path fill="currentColor"  id="dislike_btn" data-post="{{ post.id }}" data-option="dislike"
+                                            d="M20.901 10.566A1.001 1.001 0 0 0 20 10h-4V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v7H4a1.001 1.001 0 0 0-.781 1.625l8 10a1 1 0 0 0 1.562 0l8-10c.24-.301.286-.712.12-1.059M12 19.399L6.081 12H10V4h4v8h3.919z"/>
+                                        </svg>
+                                        {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" data-option="dislike"
+                                            class="hover:text-blue-400" id="dislike_btn" data-post="{{ post.id }}">
+                                            <path fill="currentColor"  id="dislike_btn" data-post="{{ post.id }}" data-option="dislike"
+                                            d="M20.901 10.566A1.001 1.001 0 0 0 20 10h-4V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v7H4a1.001 1.001 0 0 0-.781 1.625l8 10a1 1 0 0 0 1.562 0l8-10c.24-.301.286-.712.12-1.059M12 19.399L6.081 12H10V4h4v8h3.919z"/>
+                                        </svg>
+                                        {% endif %}
+                                        <p id="dislike_count"> {{ post.get_dislikes }} </p>
+                                    </button>
+                                    
+                                </div>
+                            </div>
+                            <div class="py-4 w-full" id="post_container">
+                                <div class="px-3" id="post-div">
+                                    <input type="hidden" name="post_id" id="post_id" value="{{ post.id }}" class="post_id">
+                                    <p class=" text-3xl xl:text-4xl pb-2" id="post_title">{{ post.title }}</p>
+                                    <p class=" text-xs xl:text-sm font-thin">Posted by: <a href="{% url 'user' post.user.id 'posts'  %}" class="hover:underline"> {{ post.user.username }} </a> {{ post.date_posted|naturaltime }}</p>
+                                    
+                                    {% if post.image %}
+
+                                        <img src="{{ post.image.url }}" alt="{{ post.image }}" class="bg-contain mx-auto my-4">
+
+                                    {% endif %}
+
+                                    {% if post.body %}
+                                        <p class="pt-3 mb-2 text-sm xl:text-base">{{ post.body }}</p>
+                                    {% endif %}
+                                </div>
+                    
+                                <div class="h-[50px] flex items-center justify-start pt-5 text-xs md:text-base relative border-t-[1px] border-gray-500" id="post_actions">
+                                
+                                    <div class="hover:bg-gray-300 flex items-center justify-center ml-2 xl:mx-2 gap-1 py-4 ">
+                                        <i class="fa fa-comments-o" aria-hidden="true"></i>
+                                        <p>{{ post.comment_set.all|length }} {{ post.comment_set.count|pluralize:"comment,comments" }}</p>
+                                    </div>
+        
+                                    <button class="hover:bg-gray-300 flex items-center justify-center xl:mx-2 gap-1 py-4 px-3 block" id="share_post_btn" value="{{ post.id }}" data-post-id="{{ post.id }}">
+                                        <i class="fa fa-share-square-o" aria-hidden="true" id="share_post_btn" data-post-id="{{ post.id }}"></i>
+                                        <p id="share_post_btn" data-post-id="{{ post.id }}">Share post</p>
+                                    </button>
+        
+                                    <button class="hover:bg-gray-300 flex items-center justify-center xl:mx-2 gap-1 py-4 px-2 block" id="save_post_btn_parent" value="{{ post.id }}" data-post-id="{{ post.id }}" data-user="{{ request.user }}">
+
+                                        <!-- wrapping the if condition within the text/p element will interfere with the event delegation. It wont detect this element. -->
+                                        {% is_saved post.id request.user as post_saved %}
+                                        {% if post_saved %}
+                                            <i class="fa fa-bookmark" aria-hidden="true" id="save_post_btn" data-post-id="{{ post.id }}" data-user="{{ request.user }}"></i>
+                                            <p class="save_text" id="save_post_btn" data-post-id="{{ post.id }}" data-user="{{ request.user }}">
+                                                Remove from saved
+                                            </p>
+                                        {% else %}  
+                                            <i class="fa fa-bookmark-o" aria-hidden="true" id="save_post_btn" data-post-id="{{ post.id }}" data-user="{{ request.user }}"></i>
+                                            <p class="save_text" id="save_post_btn" data-post-id="{{ post.id }}" data-user="{{ request.user }}">
+                                                Save
+                                            </p>
+                                        {% endif %}
+                                    </button>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center mt-10">No posts...</p>
+                {% endif %}
+
+                
+            </div>
+        </div>
+        <div class="">
+            <div class="fixed ">
+                <div class="bg-gray-100 h-[300px] lg:h-[400px] w-[280px] lg:w-[380px] rounded-lg p-4 hidden xl:block">
+                    <p class="text-2xl font-thin">About PostBook...</p>
+                    <br>
+                    <p class="text-justify">
+                        This is a website that is inspired heavily by Reddit. I enjoy building websites
+                        particularly social media types since it has the basic CRUD functionalities which 
+                        is essential to know in most if not all programming apps. Yes I know there are many better 
+                        examples of social media apps like Facebook and X (formerly Twitter). Even the name of this app
+                        is derived from Facebook. But, this is a starting point for me so bear with it :P.
+                    </p>
+                    <p class="mt-5 text-lg w-full">
+                        Anyway...Enjoy
+                    <br>  
+                    </p>
+                    <a href="{% url 'create-post' %}" class="bg-blue-200 hover:bg-blue-100 duration-100 block w-full text-center
+                        leading-10 rounded-full mt-2 text-lg">Create Post
+                    </a>
+                </div>
+                <div class="mt-5 bg-gray-100 h-[300px] lg:h-[400px] w-[280px] lg:w-[380px] rounded-lg p-3 hidden xl:block overflow-auto">
+                    <div class="flex items-center justify-between">
+                        <p>Recent Posts</p>
+                        <p class="cursor-pointer">Clear</p>
+                    </div>
+                    
+                    <div class="h-[100px] bg-blue-400 hover:bg-blue-200 text-white hover:text-black mt-2 p-2 cursor-pointer rounded-md hover:border-black border-[1px]">
+                        <p>Sample post</p>
+                    </div>
+                    <div class="h-[100px] bg-blue-400 hover:bg-blue-200 text-white hover:text-black mt-2 p-2 cursor-pointer rounded-md hover:border-black border-[1px]">
+                        <p>Sample post</p>
+                    </div>
+                    <div class="h-[100px] bg-blue-400 hover:bg-blue-200 text-white hover:text-black mt-2 p-2 cursor-pointer rounded-md hover:border-black border-[1px]">
+                        <p>Sample post</p>
+                    </div>
+                    <div class="h-[100px] bg-blue-400 hover:bg-blue-200 text-white hover:text-black mt-2 p-2 cursor-pointer rounded-md hover:border-black border-[1px]">
+                        <p>Sample post</p>
+                    </div>
+                    <div class="h-[100px] bg-blue-400 hover:bg-blue-200 text-white hover:text-black mt-2 p-2 cursor-pointer rounded-md hover:border-black border-[1px]">
+                        <p>Sample post</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- notifications for deleted post -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.extra_tags != 'home' %} hidden {% endif %}
+
+                    fixed left-0 right-0 top-15 mx-auto block h-[50px] max-w-[300px] md:max-w-[500px] text-sm md:text-base
+                    
+                    {% if message.tags == 'home info'  %} bg-blue-200 
+                    {% elif message.tags == 'home error' %} bg-red-200 
+                    {% else %} bg-green-200 
+                    {% endif %} 
+                    flex items-center rounded-md" id="home_message_notif">
+                    <p id="home_message_text" class="p-1">{{ message }}</p>
+                    <i  id="home_message_close"
+                        class="fa fa-times text-xl cursor-pointer absolute right-3
+                        hover:bg-gray-200 rounded-full w-7 h-7 flex items-center justify-center" 
+                        aria-hidden="true">
+                    </i>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- for saving/unsaving posts -->
+        <div class="hidden 
+
+        fixed left-0 right-0 top-15 mx-auto block h-[50px] max-w-[300px] md:max-w-[500px] text-sm md:text-base
+        
+        bg-blue-200 flex items-center rounded-md border-[1px] border-black" id="home_message_notif">
+            <p id="home_message_text" class="p-1">{{ message }}</p>
+            <i  id="home_message_close"
+                class="fa fa-times text-xl cursor-pointer absolute right-3
+                hover:bg-gray-200 rounded-full w-7 h-7 flex items-center justify-center" 
+                aria-hidden="true">
+            </i>
+        </div>
+        
+        
+    </section>
+    <a href="{% url 'home' %}" class="sticky float-right right-[25em] bottom-5 bg-gray-400 hover:bg-gray-300 w-[150px] 
+    py-3 rounded-full text-center text-lg text-gray-100 hover:text-gray-600 opacity-0 translate-y-[100px] duration-200 ease-in-out" id="resetBtn">Back to Top</a>
+    <script type="text/javascript">
+
+        const user = document.getElementById('user').value
+        const post_user = document.getElementById('post_user').value
+        let url = `ws://${window.location.host}/ws/socket-server/${post_user}/` // instead of http, we use websocket channel (ws)
+
+        // create websocket object
+        const notifSocket = new WebSocket(url)
+
+        // to be used for the delete functio where we place the csrf token to the request headers
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        let reset_btn = document.getElementById('resetBtn');
+        let post_div = document.querySelectorAll('#post-div');
+        let vote_div = document.getElementById('vote_div')
+        const post_container = document.getElementById('post_container')
+        const home_message_notif = document.getElementById('home_message_notif')
+        const home_message_text = document.getElementById('home_message_text')
+
+        
+        for (let i = 0; i < post_div.length; i++){
+
+            post_div[i].addEventListener('click', function(e){
+                var post_id = post_div[i].querySelector("input").value
+                
+                window.location.href = `http://127.0.0.1:8000/detail-post/${post_id}/`         
+            })
+        }        
+        function createPostUrl(){
+            window.location.href = "{% url 'create-post' %}"; 
+        }
+        // when user scrolls down, a button to reset to top of page will appear
+        window.addEventListener('scroll', function(){
+            if(window.scrollY > 300){
+
+                reset_btn.classList.remove('opacity-0')
+                reset_btn.classList.remove('translate-y-[100px]')
+
+                reset_btn.classList.add('opacity-100')
+                reset_btn.classList.add('translate-y-0')
+
+
+            } else {
+                reset_btn.classList.remove('opacity-100')
+                reset_btn.classList.remove('translate-y-0')
+
+
+                reset_btn.classList.add('ease-out')
+                reset_btn.classList.add('translate-y-[100px]')
+            }
+        })
+
+        $(document).on('click', document, function(e){
+            if (e.target.id === 'like_post_btn' || e.target.id === 'like_btn'){
+                const parent = e.target.closest('#like_btn_parent')
+                const post_title = parent.parentElement.parentElement.nextElementSibling.querySelector('#post_title').innerHTML // refers to vote_div's container
+                const post_user = parent.previousElementSibling.value
+                const option = e.target.getAttribute('data-option')               
+                const post_id = e.target.getAttribute('data-post')
+                const svg_like = parent.querySelector('#like_btn')
+                const like_count = parent.querySelector('#like_count')
+    
+                updateVote(option, post_id, svg_like, parent, post_user, post_title)
+    
+            }
+    
+            if (e.target.id === 'dislike_btn') {
+                const parent = e.target.closest('#dislike_btn_parent')
+                const post_title = parent.parentElement.parentElement.nextElementSibling.querySelector('#post_title').innerHTML
+                const post_user = parent.previousElementSibling.previousElementSibling.value // calling prevElementSibling will only refer to the like btn based on the HTML structure
+                console.log(post_user)
+                console.log(post_title)
+                const option = e.target.getAttribute('data-option')
+                const post_id = e.target.getAttribute('data-post')
+                const svg_dislike = parent.querySelector('#dislike_btn')
+                const like_count = parent.querySelector('#dislike_count')
+                
+                updateVote(option, post_id, svg_dislike, parent, post_user, post_title)
+            }
+
+            if (e.target.id === 'home_message_close'){
+                home_message_notif.classList.add('hidden')
+            }
+
+            if (e.target.id === 'share_post_btn'){
+                console.log(e.target)
+            }
+
+            if (e.target.id === 'save_post_btn' || e.target.id === 'save_post_btn_parent'){
+                const post_id = e.target.getAttribute('data-post-id')
+                const user = e.target.getAttribute('data-user')
+                const save_post_btn = e.target.closest('#save_post_btn_parent')
+
+                const save_post_icon = save_post_btn.querySelector('.fa')
+                const save_post_text = save_post_btn.querySelector('.save_text')
+
+                const new_icon = document.createElement('i')
+                new_icon.setAttribute('id', 'save_post_btn')
+                new_icon.setAttribute('data-post-id', post_id)
+                new_icon.setAttribute('data-user', user)
+                new_icon.ariaHidden = true
+
+                $.ajax({
+                    url: `/save-post/${post_id}/`,
+                    type: 'PUT',
+                    data: {
+                        user: user
+                    },
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+                    },
+                    success: function(res){
+                        console.log(res)
+                        home_message_notif.classList.remove('hidden')
+                        if (res.action_taken === 'Removed'){
+
+                            new_icon.setAttribute('class', 'fa fa-bookmark-o')
+                            save_post_text.innerHTML = 'Save'
+                            save_post_btn.replaceChild(new_icon, save_post_icon)
+                            home_message_text.innerHTML = res.message    
+                        } 
+                        else if (res.action_taken === 'Added') {
+
+                            new_icon.setAttribute('class', 'fa fa-bookmark')                   
+                            save_post_text.innerHTML = 'Remove from saved'
+                            save_post_btn.replaceChild(new_icon, save_post_icon)
+                            home_message_text.innerHTML = res.message
+                        }
+
+                    },
+                    error: function(err){
+                        console.error(err)
+                    }
+                })
+            }
+        })
+
+        function updateVote(option, post_id, svg, parent, post_user, post_title){
+
+            $.ajax({
+                url: `/update-vote-post/${post_id}/`,
+                data:{
+                    option: option
+                },
+                type: 'GET',
+                success: function(res){
+                    const div_parent = parent.parentElement
+                    let dislike_count = div_parent.querySelector('#dislike_count')
+                    let like_count = div_parent.querySelector('#like_count')
+                    if (option === 'like'){
+                        // clicking on an already liked btn
+                        if (res.option === 'removed like'){
+                            svg.classList.remove('text-red-400')
+                            like_count.innerHTML = res.like_count
+                            
+                        } else  {                            
+                            let dislike = div_parent.querySelector('#dislike_btn')
+                            
+                            like_count.innerHTML = res.like_count
+                            dislike_count.innerHTML = res.dislike_count
+
+                            dislike.classList.remove('text-blue-400')
+                            dislike.classList.add('hover:text-blue-400')
+                            svg.classList.add('text-red-400')
+
+                            console.log('POST_USER: ', post_user)
+                            console.log('LOGGED IN USER: ', user)
+                            if (post_user !== user){
+                                notifSocket.send(JSON.stringify({
+                                    'notif_type': 'post_vote',
+                                    'target_user': post_user,
+                                    'message': `${user} liked your post!`,
+                                    'post_title': post_title
+                                }))
+                            }      
+                            
+                            
+                        }
+                    } else {
+                        // clicking on an already disliked btn
+                        if (res.option === 'removed dislike'){
+                            svg.classList.remove('text-blue-400')
+                            dislike_count.innerHTML = res.dislike_count
+                        } else {
+                            let like = div_parent.querySelector('#like_btn')
+                            
+                            like_count.innerHTML = res.like_count
+                            dislike_count.innerHTML = res.dislike_count
+
+                            like.classList.remove('text-red-400')
+                            like.classList.add('hover:text-red-400')
+                            svg.classList.add('text-blue-400')
+
+                            console.log('POST_USER: ', post_user)
+                            console.log('LOGGED IN USER: ', user)
+                            if (post_user !== user){
+                                notifSocket.send(JSON.stringify({
+                                    'notif_type': 'post_vote',
+                                    'target_user': post_user,
+                                    'message': `${user} disliked your post!`,
+                                    'post_title': post_title
+                                }))
+                            }
+                        }
+                    }
+                            
+                    
+                },
+                error: function(err){
+                    alert(err)
+                }
+            })
+        }
+    </script>
+
+{% endblock %}
